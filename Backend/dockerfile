@@ -1,0 +1,38 @@
+# ========== Stage 1 : builder ==========
+FROM python:3.11-slim AS builder
+
+WORKDIR /app
+
+# Installation des dépendances de compilation
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    default-libmysqlclient-dev \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+
+# Installation des packages Python dans /install
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+
+# ========== Stage 2 : image finale ==========
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Installer uniquement les bibliothèques runtime nécessaires (pas gcc)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    default-libmysqlclient-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copier les packages Python compilés depuis le stage builder
+COPY --from=builder /install /usr/local
+
+# Copier le code source de l'application
+COPY . .
+
+# Vérifier que Gunicorn est bien installé
+RUN gunicorn --version
+
+CMD ["gunicorn", "--workers", "4", "--worker-class", "gevent", "--bind", "0.0.0.0:5000", "main:app"]
