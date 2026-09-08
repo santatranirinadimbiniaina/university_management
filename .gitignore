@@ -1,6 +1,8 @@
 Backend/env
-Backend/_pycache_
+# Backend Python cache
+backend/**/__pycache__/
 Backend/app/_pycache_
+Backend/app/migrations
 
 # Logs
 logs
