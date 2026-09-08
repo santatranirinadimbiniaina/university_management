@@ -2,7 +2,7 @@ Backend/env
 # Backend Python cache
 backend/**/__pycache__/
 Backend/app/_pycache_
-Backend/app/migrations
+Backend/migrations
 
 # Logs
 logs
