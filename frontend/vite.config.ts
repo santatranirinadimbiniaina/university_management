@@ -11,9 +11,15 @@ const __dirname = path.dirname(__filename);
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss(), viteSingleFile()],
+  server:{
+    port:3000,
+    host:'0.0.0.0',
+    open: true
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
     },
   },
+  
 });
