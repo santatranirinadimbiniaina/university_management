@@ -13,7 +13,7 @@ export function SplashScreen() {
         <ShieldCheck className="h-8 w-8 text-white" strokeWidth={2.2} />
       </div>
       <p className="mt-6 font-display text-sm font-semibold uppercase tracking-[0.3em] text-brand-300">
-        Aegis
+        GerUniv
       </p>
       <p className="mt-1 text-xs text-ink-400">Chargement de la session…</p>
     </div>
@@ -71,7 +71,7 @@ function Shell() {
               <ShieldCheck className="h-4 w-4 text-white" strokeWidth={2.4} />
             </span>
             <span className="font-display text-sm font-bold tracking-[0.18em] text-ink-900">
-              AEGIS
+              GERUNIV
             </span>
           </div>
         </header>

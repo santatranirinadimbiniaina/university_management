@@ -85,7 +85,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           <ShieldCheck className="h-5.5 w-5.5 text-white" strokeWidth={2.2} />
         </div>
         <div>
-          <p className="font-display text-lg font-bold leading-none tracking-[0.18em]">AEGIS</p>
+          <p className="font-display text-lg font-bold leading-none tracking-[0.18em]">GERUNIV</p>
           <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.22em] text-brand-300">
             Console admin
           </p>

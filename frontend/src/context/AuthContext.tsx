@@ -10,7 +10,7 @@ import {
 import { api } from "@/lib/api";
 import type { AccountType, Session } from "@/lib/types";
 
-const STORAGE_KEY = "aegis.session";
+const STORAGE_KEY = "GERUNIV.session";
 
 interface AuthContextValue {
   session: Session | null;

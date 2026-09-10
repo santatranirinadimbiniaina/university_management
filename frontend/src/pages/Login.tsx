@@ -65,11 +65,11 @@ function BrandPanel() {
         </div>
         <div>
           <p className="font-display text-lg font-bold leading-none tracking-[0.18em] text-white">
-            AEGIS
+            GERUNIV
           </p>
-          <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-brand-300">
+          {/* <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-brand-300">
             Console admin
-          </p>
+          </p> */}
         </div>
       </div>
 
@@ -122,7 +122,7 @@ function BrandPanel() {
         </div>
       </div>
 
-      <motion.div
+      {/* <motion.div
         custom={6}
         variants={fadeUp}
         initial="hidden"
@@ -138,7 +138,7 @@ function BrandPanel() {
         <span className="ml-auto text-[11px] font-medium uppercase tracking-[0.2em] text-ink-400">
           Flask-RESTX
         </span>
-      </motion.div>
+      </motion.div> */}
     </div>
   );
 }
@@ -201,7 +201,7 @@ export default function Login() {
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand-400 to-brand-600">
               <ShieldCheck className="h-5 w-5 text-white" strokeWidth={2.2} />
             </div>
-            <p className="font-display text-lg font-bold tracking-[0.18em] text-ink-900">AEGIS</p>
+            <p className="font-display text-lg font-bold tracking-[0.18em] text-ink-900">GERUNIV</p>
           </div>
 
           <div className="rounded-3xl border border-ink-900/8 bg-white p-7 shadow-lift sm:p-9">
@@ -294,16 +294,16 @@ export default function Login() {
               variant="secondary"
               size="lg"
               className="w-full"
-              icon={<Sparkles className="h-4 w-4" />}
+              // icon={<Sparkles className="h-4 w-4" />}
               onClick={handleDemo}
             >
               Explorer en mode démo
             </Button>
 
-            <p className="mt-6 flex items-center justify-center gap-2 text-center font-mono text-[11px] text-ink-300">
+            {/* <p className="mt-6 flex items-center justify-center gap-2 text-center font-mono text-[11px] text-ink-300">
               <RefreshCw className="h-3 w-3" />
               {API_BASE_URL}/{type === "super_admin" ? "super_admin" : "utilisateurs"}/login
-            </p>
+            </p> */}
           </div>
 
           <p className="mt-5 text-center text-xs text-ink-400">
