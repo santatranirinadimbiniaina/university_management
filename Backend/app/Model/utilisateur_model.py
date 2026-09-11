@@ -6,6 +6,7 @@ class Utilisateur(db.Model):
     __tablename__ = 'utilisateur'
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id_classe = db.Column(db.Integer(), db.ForeignKey('Classe.id_classe'), nullable=False)
     matricule = db.Column(db.String(20), nullable=False)
     mot_de_passe = db.Column(db.String(255), nullable=False)
     nom = db.Column(db.String(100), nullable=False)
