@@ -6,11 +6,17 @@ from app.Model.super_admin_model import SuperAdmin
 
 SuperAdmin_ns = Namespace('super_admin')
 
+# Le modèle de SORTIE n'expose jamais le hash du mot de passe
+# (flask-restx 1.3.2 ignore load_only : il faut un modèle dédié).
 SuperAdmin_model = SuperAdmin_ns.model("SuperAdmin", {
     "id": fields.Integer(readOnly=True),
     "matricule": fields.String(required=True),
-    "mot_de_passe": fields.String(load_only=True),
     "date_creation": fields.DateTime(readOnly=True)
+})
+
+SuperAdmin_input = SuperAdmin_ns.model("SuperAdminInput", {
+    "matricule": fields.String(required=True),
+    "mot_de_passe": fields.String(required=True),
 })
 
 login_model = SuperAdmin_ns.model('Login', {
@@ -37,7 +43,7 @@ class SuperAdminList(Resource):
 @SuperAdmin_ns.route("/creer_admin")
 class SuperAdminRegister(Resource):
     @SuperAdmin_ns.marshal_with(SuperAdmin_model)
-    @SuperAdmin_ns.expect(SuperAdmin_model)
+    @SuperAdmin_ns.expect(SuperAdmin_input)
     def post(self):
         data = request.get_json()
         
@@ -66,7 +72,7 @@ class SuperAdminResource(Resource):
         return SuperAdmin.query.get_or_404(id)
 
     @SuperAdmin_ns.marshal_with(SuperAdmin_model)
-    @SuperAdmin_ns.expect(SuperAdmin_model)
+    @SuperAdmin_ns.expect(SuperAdmin_input)
     def put(self, id):
         admin = SuperAdmin.query.get_or_404(id)
         data = request.get_json()

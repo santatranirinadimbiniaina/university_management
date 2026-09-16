@@ -52,26 +52,65 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (type: AccountType, matricule: string, motDePasse: string) => {
       if (type === "super_admin") {
         const res = await api.loginSuperAdmin(matricule, motDePasse);
-        persist({
-          type,
-          accessToken: res.access_token,
-          refreshToken: res.refresh_token,
-          profile: { id: res.admin.id, matricule: res.admin.matricule, role: "super_admin" },
-          demo: false,
-        });
-      } else {
-        const res = await api.loginUtilisateur(matricule, motDePasse);
+        if (!res.admin) throw new Error("Réponse de connexion inattendue.");
         persist({
           type,
           accessToken: res.access_token,
           refreshToken: res.refresh_token,
           profile: {
-            id: res.user.id,
-            matricule: res.user.matricule,
-            nom: res.user.nom,
-            role: res.user.role,
-            classe: res.user.classe,
-            permission: res.user.permission,
+            id: res.admin.id,
+            matricule: res.admin.matricule,
+            role: "super_admin",
+          },
+          demo: false,
+        });
+      } else if (type === "directeur") {
+        const res = await api.loginDirecteur(matricule, motDePasse);
+        if (!res.directeur) throw new Error("Réponse de connexion inattendue.");
+        persist({
+          type,
+          accessToken: res.access_token,
+          refreshToken: res.refresh_token,
+          profile: {
+            id: res.directeur.id_directeur,
+            matricule: res.directeur.matricule,
+            nom: res.directeur.nom,
+            prenom: res.directeur.prenom,
+            role: "directeur",
+            id_etablissement: res.directeur.id_etablissement,
+          },
+          demo: false,
+        });
+      } else if (type === "professeur") {
+        const res = await api.loginProfesseur(matricule, motDePasse);
+        if (!res.professeur) throw new Error("Réponse de connexion inattendue.");
+        persist({
+          type,
+          accessToken: res.access_token,
+          refreshToken: res.refresh_token,
+          profile: {
+            id: res.professeur.id_professeur,
+            matricule: res.professeur.matricule,
+            nom: res.professeur.nom,
+            prenom: res.professeur.prenom,
+            role: "professeur",
+          },
+          demo: false,
+        });
+      } else {
+        const res = await api.loginEtudiant(matricule, motDePasse);
+        if (!res.etudiant) throw new Error("Réponse de connexion inattendue.");
+        persist({
+          type,
+          accessToken: res.access_token,
+          refreshToken: res.refresh_token,
+          profile: {
+            id: res.etudiant.id_etudiant,
+            matricule: res.etudiant.matricule,
+            nom: res.etudiant.nom,
+            prenom: res.etudiant.prenom,
+            role: "etudiant",
+            id_classe: res.etudiant.id_classe,
           },
           demo: false,
         });

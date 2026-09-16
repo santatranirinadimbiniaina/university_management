@@ -4,22 +4,22 @@ import { motion } from "framer-motion";
 import {
   AlertCircle,
   ArrowRight,
+  Backpack,
+  BriefcaseBusiness,
   CloudOff,
   Eye,
   EyeOff,
   Fingerprint,
+  GraduationCap,
   Hash,
   KeyRound,
   LockKeyhole,
-  RefreshCw,
   Shield,
   ShieldCheck,
-  Sparkles,
   User,
-  Users,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { API_BASE_URL, ApiError } from "@/lib/api";
+import { ApiError } from "@/lib/api";
 import type { AccountType } from "@/lib/types";
 import { Button, Input, Segmented } from "@/components/ui";
 
@@ -30,14 +30,14 @@ const FEATURES = [
     text: "Access et refresh tokens émis par /login, renouvelés via /refresh.",
   },
   {
-    icon: <Users className="h-4.5 w-4.5" />,
-    title: "Comptes unifiés",
-    text: "Super admins et utilisateurs pilotés depuis une seule console.",
+    icon: <GraduationCap className="h-4.5 w-4.5" />,
+    title: "Espaces dédiés",
+    text: "Super admin, professeurs et étudiants, chacun avec ses propres droits.",
   },
   {
     icon: <Fingerprint className="h-4.5 w-4.5" />,
-    title: "Permissions fines",
-    text: "Rôles, classes et niveaux d'accès appliqués à chaque matricule.",
+    title: "Notes sécurisées",
+    text: "Seul le professeur affecté à une classe peut y saisir des notes.",
   },
 ];
 
@@ -48,6 +48,13 @@ const fadeUp = {
     y: 0,
     transition: { delay: 0.12 * i, duration: 0.55, ease: [0.22, 1, 0.36, 1] as const },
   }),
+};
+
+const PLACEHOLDERS: Record<AccountType, string> = {
+  super_admin: "SA-0001",
+  directeur: "DIR-001",
+  professeur: "PROF-001",
+  etudiant: "ETU-001",
 };
 
 function BrandPanel() {
@@ -67,9 +74,6 @@ function BrandPanel() {
           <p className="font-display text-lg font-bold leading-none tracking-[0.18em] text-white">
             GERUNIV
           </p>
-          {/* <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-brand-300">
-            Console admin
-          </p> */}
         </div>
       </div>
 
@@ -81,11 +85,11 @@ function BrandPanel() {
           animate="visible"
           className="font-display text-balance text-4xl font-bold leading-[1.08] tracking-tight text-white xl:text-[2.9rem]"
         >
-          Pilotez tous vos{" "}
+          Gérez votre établissement,{" "}
           <span className="bg-gradient-to-r from-brand-300 via-sky-300 to-brand-200 bg-clip-text text-transparent">
-            comptes et accès
+            vos classes et vos notes
           </span>{" "}
-          depuis un seul poste.
+          en un seul endroit.
         </motion.h1>
         <motion.p
           custom={2}
@@ -94,10 +98,8 @@ function BrandPanel() {
           animate="visible"
           className="mt-5 max-w-md text-[15px] leading-relaxed text-ink-200"
         >
-          Console d'administration connectée à vos namespaces Flask-RESTX
-          <span className="text-brand-300"> super_admin</span> et
-          <span className="text-brand-300"> utilisateurs</span>. Créez, modifiez et révoquez les
-          accès en toute confiance.
+          Plateforme de gestion scolaire : établissements, classes, matières avec
+          coefficients, professeurs affectés, étudiants et relevés de notes.
         </motion.p>
 
         <div className="mt-10 space-y-4">
@@ -121,24 +123,6 @@ function BrandPanel() {
           ))}
         </div>
       </div>
-
-      {/* <motion.div
-        custom={6}
-        variants={fadeUp}
-        initial="hidden"
-        animate="visible"
-        className="relative flex items-center gap-2 border-t border-white/8 px-12 py-5"
-      >
-        <span className="rounded-md bg-white/6 px-2.5 py-1 font-mono text-[11px] text-brand-200 ring-1 ring-white/10">
-          GET /super_admin/
-        </span>
-        <span className="rounded-md bg-white/6 px-2.5 py-1 font-mono text-[11px] text-brand-200 ring-1 ring-white/10">
-          GET /utilisateurs/
-        </span>
-        <span className="ml-auto text-[11px] font-medium uppercase tracking-[0.2em] text-ink-400">
-          Flask-RESTX
-        </span>
-      </motion.div> */}
     </div>
   );
 }
@@ -210,7 +194,7 @@ export default function Login() {
                 Connexion
               </h2>
               <p className="mt-1 text-sm text-ink-400">
-                Identifiez-vous pour accéder à la console d'administration.
+                Accédez à votre espace selon votre profil.
               </p>
             </div>
 
@@ -220,8 +204,10 @@ export default function Login() {
               value={type}
               onChange={(v) => setType(v as AccountType)}
               options={[
-                { value: "super_admin", label: "Super Admin", icon: <Shield /> },
-                { value: "utilisateur", label: "Utilisateur", icon: <User /> },
+                { value: "super_admin", label: "Admin", icon: <Shield /> },
+                { value: "directeur", label: "Directeur", icon: <BriefcaseBusiness /> },
+                { value: "professeur", label: "Professeur", icon: <GraduationCap /> },
+                { value: "etudiant", label: "Étudiant", icon: <Backpack /> },
               ]}
             />
 
@@ -229,7 +215,7 @@ export default function Login() {
               <Input
                 label="Matricule"
                 name="matricule"
-                placeholder={type === "super_admin" ? "SA-0001" : "USR-1001"}
+                placeholder={PLACEHOLDERS[type]}
                 icon={<Hash />}
                 value={matricule}
                 onChange={(e) => setMatricule(e.target.value)}
@@ -290,24 +276,18 @@ export default function Login() {
               <span className="h-px flex-1 bg-ink-100" />
             </div>
 
-            <Button
-              variant="secondary"
-              size="lg"
-              className="w-full"
-              // icon={<Sparkles className="h-4 w-4" />}
-              onClick={handleDemo}
-            >
+            <Button variant="secondary" size="lg" className="w-full" onClick={handleDemo}>
               Explorer en mode démo
             </Button>
-
-            {/* <p className="mt-6 flex items-center justify-center gap-2 text-center font-mono text-[11px] text-ink-300">
-              <RefreshCw className="h-3 w-3" />
-              {API_BASE_URL}/{type === "super_admin" ? "super_admin" : "utilisateurs"}/login
-            </p> */}
           </div>
 
           <p className="mt-5 text-center text-xs text-ink-400">
-            Accès réservé au personnel autorisé — chaque connexion est journalisée par le backend.
+            Accès réservé aux membres de l'établissement — chaque connexion est journalisée par le
+            backend.
+          </p>
+          <p className="mt-2 hidden items-center justify-center gap-1.5 text-[11px] text-ink-300 sm:flex">
+            <User className="h-3 w-3" />
+            Les comptes sont créés par le super administrateur.
           </p>
         </motion.div>
       </div>

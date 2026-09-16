@@ -12,7 +12,10 @@ from datetime import timedelta, datetime, date
 from . import registre_model
 
 from app.Controller.admin_controller import SuperAdmin_ns
-from app.Controller.utilisateur_controller import Utilisateur_ns
+from app.Controller.scolaire import (
+    Etablissement_ns, Directeur_ns, Classe_ns, Matiere_ns, Professeur_ns,
+    Affectation_ns, Etudiant_ns, Note_ns, DemandeReleve_ns,
+)
 
 def output_json(data, code, headers=None):
     def custom_serializer(obj):
@@ -72,7 +75,15 @@ def create_app():
     api = Api(app, doc="/docs")
 
     api.add_namespace(SuperAdmin_ns)
-    api.add_namespace(Utilisateur_ns)
+    api.add_namespace(Etablissement_ns)
+    api.add_namespace(Directeur_ns)
+    api.add_namespace(Classe_ns)
+    api.add_namespace(Matiere_ns)
+    api.add_namespace(Professeur_ns)
+    api.add_namespace(Affectation_ns)
+    api.add_namespace(Etudiant_ns)
+    api.add_namespace(Note_ns)
+    api.add_namespace(DemandeReleve_ns)
 
     @app.route("/health")
     def health():

@@ -1,5 +1,16 @@
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, LogOut, Settings, ShieldCheck, Users } from "lucide-react";
+import {
+  BookOpen,
+  BriefcaseBusiness,
+  FileText,
+  GraduationCap,
+  LayoutDashboard,
+  LogOut,
+  School,
+  Settings,
+  ShieldCheck,
+  Users,
+} from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useData } from "@/context/DataContext";
 import { cn } from "@/utils/cn";
@@ -71,6 +82,8 @@ function StatusChip() {
 export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const { session, logout } = useAuth();
   const isSuperAdmin = session?.type === "super_admin";
+  const isDirecteur = session?.type === "directeur";
+  const isEtudiant = session?.type === "etudiant";
 
   return (
     <div className="relative flex h-full flex-col overflow-hidden bg-ink-900 text-white">
@@ -87,7 +100,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         <div>
           <p className="font-display text-lg font-bold leading-none tracking-[0.18em]">GERUNIV</p>
           <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.22em] text-brand-300">
-            Console admin
+            Gestion scolaire
           </p>
         </div>
       </div>
@@ -101,7 +114,25 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           <div className="space-y-1">
             <NavItem to="/" end icon={<LayoutDashboard />} label="Accueil" onNavigate={onNavigate} />
             {isSuperAdmin && (
-              <NavItem to="/comptes" icon={<Users />} label="Comptes" onNavigate={onNavigate} />
+              <>
+                <NavItem to="/etablissements" icon={<School />} label="Établissements" onNavigate={onNavigate} />
+                <NavItem to="/directeurs" icon={<BriefcaseBusiness />} label="Directeurs" onNavigate={onNavigate} />
+                <NavItem to="/demandes" icon={<FileText />} label="Demandes de relevé" onNavigate={onNavigate} />
+              </>
+            )}
+            {isDirecteur && (
+              <>
+                <NavItem to="/classes" icon={<BookOpen />} label="Classes & matières" onNavigate={onNavigate} />
+                <NavItem to="/professeurs" icon={<GraduationCap />} label="Professeurs" onNavigate={onNavigate} />
+                <NavItem to="/etudiants" icon={<Users />} label="Étudiants" onNavigate={onNavigate} />
+                <NavItem to="/demandes" icon={<FileText />} label="Demandes de relevé" onNavigate={onNavigate} />
+              </>
+            )}
+            {session?.type === "professeur" && (
+              <NavItem to="/mes-notes" icon={<GraduationCap />} label="Saisie des notes" onNavigate={onNavigate} />
+            )}
+            {isEtudiant && (
+              <NavItem to="/mes-notes" icon={<BookOpen />} label="Mes notes" onNavigate={onNavigate} />
             )}
           </div>
         </div>
@@ -136,13 +167,21 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
               <LogOut className="h-4.5 w-4.5" />
             </button>
           </div>
-          {isSuperAdmin && (
-            <div className="mt-3">
-              <Badge variant="brand" icon={<ShieldCheck />} className="!bg-brand-500/15 !text-brand-200 !ring-brand-400/20">
-                Super administrateur
-              </Badge>
-            </div>
-          )}
+          <div className="mt-3">
+            <Badge
+              variant="brand"
+              icon={<ShieldCheck />}
+              className="!bg-brand-500/15 !text-brand-200 !ring-brand-400/20"
+            >
+              {isSuperAdmin
+                ? "Super administrateur"
+                : isDirecteur
+                  ? "Directeur"
+                  : isEtudiant
+                    ? "Étudiant"
+                    : "Professeur"}
+            </Badge>
+          </div>
         </div>
         <p className="px-1 text-center text-[10px] font-medium uppercase tracking-[0.2em] text-ink-500">
           Flask-RESTX · JWT

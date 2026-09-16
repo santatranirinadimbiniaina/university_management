@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import {
   Backpack,
   Briefcase,
+  BriefcaseBusiness,
   ChevronDown,
   Eye,
   GraduationCap,
@@ -264,14 +265,35 @@ export function PermissionBadge({ permission }: { permission?: string | null }) 
   );
 }
 
-export function TypeBadge({ type }: { type: "super_admin" | "utilisateur" }) {
-  return type === "super_admin" ? (
-    <Badge variant="ink" icon={<Shield />}>
-      Super admin
-    </Badge>
-  ) : (
-    <Badge variant="brand" icon={<User />}>
-      Utilisateur
+export function TypeBadge({
+  type,
+}: {
+  type: "super_admin" | "directeur" | "professeur" | "etudiant";
+}) {
+  if (type === "super_admin") {
+    return (
+      <Badge variant="ink" icon={<Shield />}>
+        Super admin
+      </Badge>
+    );
+  }
+  if (type === "directeur") {
+    return (
+      <Badge variant="brand" icon={<BriefcaseBusiness />}>
+        Directeur
+      </Badge>
+    );
+  }
+  if (type === "professeur") {
+    return (
+      <Badge variant="brand" icon={<GraduationCap />}>
+        Professeur
+      </Badge>
+    );
+  }
+  return (
+    <Badge variant="success" icon={<Backpack />}>
+      Étudiant
     </Badge>
   );
 }

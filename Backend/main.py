@@ -23,21 +23,27 @@ app.json = CustomJSONProvider(app)
 @app.shell_context_processor
 def make_shell_context():
     from app.Model.super_admin_model import SuperAdmin
-    from app.Model.utilisateur_model import Utilisateur
-    from app.Model.organisation_model import Organisation
-    from app.Model.Depot_model import Depot
-    from app.Model.categorie_model import Categorie
-    from app.Model.article_model import Article
-    from app.Model.sortie_model import Sortie
+    from app.Model.etablissement_model import Etablissement
+    from app.Model.directeur_model import Directeur
+    from app.Model.classe_model import Classe
+    from app.Model.matiere_model import Matiere
+    from app.Model.professeur_model import Professeur
+    from app.Model.affectation_model import Affectation
+    from app.Model.etudiant_model import Etudiant
+    from app.Model.note_model import Note
+    from app.Model.demande_releve_model import DemandeReleve
     return {
         "db": db,
         "SuperAdmin": SuperAdmin,
-        "Utilisateur": Utilisateur,
-        "Organisation": Organisation,
-        "Depot" : Depot,
-        "Categorie": Categorie,
-        "Article": Article,
-        "Sortie": Sortie
+        "Etablissement": Etablissement,
+        "Directeur": Directeur,
+        "Classe": Classe,
+        "Matiere": Matiere,
+        "Professeur": Professeur,
+        "Affectation": Affectation,
+        "Etudiant": Etudiant,
+        "Note": Note,
+        "DemandeReleve": DemandeReleve
     }
 
 if __name__ == "__main__":

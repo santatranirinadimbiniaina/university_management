@@ -14,22 +14,19 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { useData } from "@/context/DataContext";
 import { useToast } from "@/components/Toast";
-import {
-  Avatar,
-  Badge,
-  Button,
-  Card,
-  Input,
-  PermissionBadge,
-  RoleBadge,
-  TypeBadge,
-} from "@/components/ui";
+import { Avatar, Badge, Button, Card, Input, TypeBadge } from "@/components/ui";
 import { tokenExpiry } from "@/lib/jwt";
-import { ApiError } from "@/lib/api";
+
+const ROLE_LABEL: Record<string, string> = {
+  super_admin: "Super administrateur",
+  directeur: "Directeur",
+  professeur: "Professeur",
+  etudiant: "Étudiant",
+};
 
 export default function Profil() {
   const { session, logout } = useAuth();
-  const data = useData();
+  const { updateProfesseur, updateEtudiant, updateDirecteur } = useData();
   const toast = useToast();
 
   const [motDePasse, setMotDePasse] = useState("");
@@ -64,18 +61,23 @@ export default function Profil() {
 
     setSubmitting(true);
     try {
-      if (isSuperAdmin) {
-        await data.updateAdmin(profile.id, { matricule: profile.matricule, mot_de_passe: motDePasse });
-      } else {
-        await data.updateUtilisateur(profile.id, { mot_de_passe: motDePasse });
+      if (session.type === "directeur") {
+        await updateDirecteur(profile.id, { mot_de_passe: motDePasse });
+      } else if (session.type === "professeur") {
+        await updateProfesseur(profile.id, { mot_de_passe: motDePasse });
+      } else if (session.type === "etudiant") {
+        await updateEtudiant(profile.id, { mot_de_passe: motDePasse });
       }
-      toast.success("Mot de passe mis à jour", "Votre nouveau mot de passe est actif dès maintenant.");
+      toast.success(
+        "Mot de passe mis à jour",
+        "Votre nouveau mot de passe est actif dès maintenant.",
+      );
       setMotDePasse("");
       setConfirmation("");
     } catch (err) {
       toast.error(
         "Échec de la mise à jour",
-        err instanceof ApiError || err instanceof Error ? err.message : "Une erreur est survenue.",
+        err instanceof Error ? err.message : "Une erreur est survenue.",
       );
     } finally {
       setSubmitting(false);
@@ -114,31 +116,23 @@ export default function Profil() {
               </p>
               <div className="relative mt-4 flex flex-wrap items-center justify-center gap-2">
                 <TypeBadge type={session.type} />
-                <RoleBadge role={profile.role ?? (isSuperAdmin ? "super_admin" : undefined)} />
                 {session.demo && <Badge variant="warning">Mode démo</Badge>}
               </div>
             </div>
             <dl className="divide-y divide-ink-900/5 px-6">
               {[
                 { label: "Identifiant unique", value: `#${profile.id}` },
-                { label: "Classe", value: profile.classe || "—", capitalize: true },
-                { label: "Type de session", value: isSuperAdmin ? "Super admin" : "Utilisateur" },
+                { label: "Rôle", value: ROLE_LABEL[session.type] ?? session.type },
+                {
+                  label: "Type de session",
+                  value: isSuperAdmin ? "Super admin" : ROLE_LABEL[session.type] ?? "Utilisateur",
+                },
               ].map((item) => (
                 <div key={item.label} className="flex items-center justify-between py-3.5">
                   <dt className="text-[13px] font-medium text-ink-400">{item.label}</dt>
-                  <dd
-                    className={`text-sm font-semibold text-ink-800 ${item.capitalize ? "capitalize" : ""}`}
-                  >
-                    {item.value}
-                  </dd>
+                  <dd className="text-sm font-semibold text-ink-800">{item.value}</dd>
                 </div>
               ))}
-              <div className="flex items-center justify-between py-3.5">
-                <dt className="text-[13px] font-medium text-ink-400">Permission</dt>
-                <dd>
-                  <PermissionBadge permission={profile.permission} />
-                </dd>
-              </div>
             </dl>
           </Card>
         </motion.div>
@@ -159,6 +153,12 @@ export default function Profil() {
                 Le nouveau mot de passe est haché par le backend via{" "}
                 <span className="font-mono text-[12px]">set_password()</span>.
               </p>
+              {isSuperAdmin && (
+                <p className="mt-2 text-[13px] text-amber-700">
+                  Le mot de passe du super admin se modifie via l'API{" "}
+                  <span className="font-mono text-[12px]">/super_admin/&lt;id&gt;</span>.
+                </p>
+              )}
               <form onSubmit={(e) => void handlePassword(e)} className="mt-5 grid gap-4 sm:grid-cols-2">
                 <Input
                   label="Nouveau mot de passe"
@@ -203,7 +203,12 @@ export default function Profil() {
                   }
                 />
                 <div className="sm:col-span-2">
-                  <Button type="submit" loading={submitting} icon={<ShieldCheck className="h-4 w-4" />}>
+                  <Button
+                    type="submit"
+                    loading={submitting}
+                    icon={<ShieldCheck className="h-4 w-4" />}
+                    disabled={isSuperAdmin}
+                  >
                     Mettre à jour le mot de passe
                   </Button>
                 </div>

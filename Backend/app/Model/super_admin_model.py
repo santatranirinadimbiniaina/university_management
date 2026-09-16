@@ -29,6 +29,10 @@ class SuperAdmin(db.Model):
             'matricule': self.matricule
         }
     
+    def to_dict_public(self):
+        """Version sans le hash du mot de passe, pour les réponses API."""
+        return self.to_dict()
+    
     def save(self):
         db.session.add(self)
         db.session.commit()

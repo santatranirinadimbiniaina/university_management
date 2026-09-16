@@ -1,4 +1,14 @@
-import type { SuperAdmin, Utilisateur } from "./types";
+import type {
+  Affectation,
+  Classe,
+  Directeur,
+  DemandeReleve,
+  Etablissement,
+  Etudiant,
+  Matiere,
+  Note,
+  Professeur,
+} from "./types";
 
 const daysAgo = (n: number) => {
   const d = new Date();
@@ -7,27 +17,49 @@ const daysAgo = (n: number) => {
 };
 
 /** Jeu de données hors-ligne pour explorer l'interface sans serveur Flask. */
-export const mockAdmins: SuperAdmin[] = [
-  { id: 1, matricule: "SA-0001", date_creation: daysAgo(214) },
-  { id: 2, matricule: "SA-0002", date_creation: daysAgo(178) },
-  { id: 3, matricule: "SA-0107", date_creation: daysAgo(96) },
-  { id: 4, matricule: "SA-0123", date_creation: daysAgo(41) },
-  { id: 5, matricule: "SA-0140", date_creation: daysAgo(6) },
+export const mockEtablissements: Etablissement[] = [
+  { id_etablissement: 1, nom: "Lycée Démo", adresse: "Avenue Centrale", telephone: "+221 33 000 00 00", date_creation: daysAgo(300) },
 ];
 
-export const mockUtilisateurs: Utilisateur[] = [
-  { id: 1, matricule: "USR-1001", nom: "Awa Ndiaye", role: "enseignant", classe: "terminale", permission: "ecriture", date_creation: daysAgo(210) },
-  { id: 2, matricule: "USR-1002", nom: "Moussa Diallo", role: "eleve", classe: "3eme", permission: "lecture", date_creation: daysAgo(204) },
-  { id: 3, matricule: "USR-1003", nom: "Fatou Sow", role: "administrateur", classe: "aucune", permission: "totale", date_creation: daysAgo(187) },
-  { id: 4, matricule: "USR-1004", nom: "Ibrahima Ba", role: "enseignant", classe: "6eme", permission: "ecriture", date_creation: daysAgo(169) },
-  { id: 5, matricule: "USR-1005", nom: "Mariam Camara", role: "eleve", classe: "1ere", permission: "lecture", date_creation: daysAgo(154) },
-  { id: 6, matricule: "USR-1006", nom: "Ousmane Sy", role: "personnel", classe: "aucune", permission: "lecture", date_creation: daysAgo(133) },
-  { id: 7, matricule: "USR-1007", nom: "Aïcha Traoré", role: "eleve", classe: "5eme", permission: "lecture", date_creation: daysAgo(118) },
-  { id: 8, matricule: "USR-1008", nom: "Sékou Kouyaté", role: "enseignant", classe: "2nde", permission: "ecriture", date_creation: daysAgo(92) },
-  { id: 9, matricule: "USR-1009", nom: "Bintou Koné", role: "eleve", classe: "4eme", permission: "lecture", date_creation: daysAgo(74) },
-  { id: 10, matricule: "USR-1010", nom: "Lamine Fofana", role: "eleve", classe: "terminale", permission: "lecture", date_creation: daysAgo(58) },
-  { id: 11, matricule: "USR-1011", nom: "Nafissatou Bah", role: "administrateur", classe: "aucune", permission: "totale", date_creation: daysAgo(33) },
-  { id: 12, matricule: "USR-1012", nom: "Cheikh Gueye", role: "personnel", classe: "aucune", permission: "ecriture", date_creation: daysAgo(21) },
-  { id: 13, matricule: "USR-1013", nom: "Aminata Keita", role: "eleve", classe: "2nde", permission: "lecture", date_creation: daysAgo(9) },
-  { id: 14, matricule: "USR-1014", nom: "Paul Mendy", role: "enseignant", classe: "1ere", permission: "ecriture", date_creation: daysAgo(2) },
+export const mockDirecteurs: Directeur[] = [
+  { id_directeur: 1, matricule: "DIR-001", nom: "Dia", prenom: "Aminata", id_etablissement: 1, date_creation: daysAgo(299) },
+];
+
+export const mockClasses: Classe[] = [
+  { id_classe: 1, nom_classe: "2nde A", niveau: "2nde", id_etablissement: 1 },
+  { id_classe: 2, nom_classe: "1ère S", niveau: "1ère", id_etablissement: 1 },
+];
+
+export const mockMatieres: Matiere[] = [
+  { id_matiere: 1, nom_matiere: "Mathématiques", coefficient: 4, id_classe: 1 },
+  { id_matiere: 2, nom_matiere: "Histoire", coefficient: 2, id_classe: 1 },
+  { id_matiere: 3, nom_matiere: "Mathématiques", coefficient: 5, id_classe: 2 },
+];
+
+export const mockProfesseurs: Professeur[] = [
+  { id_professeur: 1, matricule: "PROF-001", nom: "Dupont", prenom: "Jean", email: "j.dupont@demo.sn", date_creation: daysAgo(120) },
+  { id_professeur: 2, matricule: "PROF-002", nom: "Sow", prenom: "Fatou", email: "f.sow@demo.sn", date_creation: daysAgo(90) },
+];
+
+export const mockAffectations: Affectation[] = [
+  { id_affectation: 1, id_professeur: 1, id_classe: 1, id_matiere: 1 },
+  { id_affectation: 2, id_professeur: 1, id_classe: 2, id_matiere: 3 },
+  { id_affectation: 3, id_professeur: 2, id_classe: 1, id_matiere: 2 },
+];
+
+export const mockEtudiants: Etudiant[] = [
+  { id_etudiant: 1, matricule: "ETU-001", nom: "Martin", prenom: "Alice", id_classe: 1, date_creation: daysAgo(60) },
+  { id_etudiant: 2, matricule: "ETU-002", nom: "Bernard", prenom: "Marc", id_classe: 1, date_creation: daysAgo(45) },
+  { id_etudiant: 3, matricule: "ETU-003", nom: "Diallo", prenom: "Awa", id_classe: 2, date_creation: daysAgo(30) },
+];
+
+export const mockNotes: Note[] = [
+  { id_note: 1, note: 15.5, type_evaluation: "devoir", semestre: "S1", id_etudiant: 1, id_matiere: 1, id_professeur: 1, date_saisie: daysAgo(10) },
+  { id_note: 2, note: 12, type_evaluation: "composition", semestre: "S1", id_etudiant: 1, id_matiere: 2, id_professeur: 2, date_saisie: daysAgo(8) },
+  { id_note: 3, note: 9, type_evaluation: "devoir", semestre: "S1", id_etudiant: 2, id_matiere: 1, id_professeur: 1, date_saisie: daysAgo(10) },
+  { id_note: 4, note: 17, type_evaluation: "devoir", semestre: "S1", id_etudiant: 3, id_matiere: 3, id_professeur: 1, date_saisie: daysAgo(6) },
+];
+
+export const mockDemandes: DemandeReleve[] = [
+  { id_demande: 1, motif: "Dossier de bourse", statut: "en_attente", date_demande: daysAgo(2), id_etudiant: 1 },
 ];
