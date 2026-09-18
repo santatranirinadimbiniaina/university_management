@@ -194,6 +194,82 @@ def test_directeur_traite_les_demandes_de_son_etablissement(client, app):
     assert r.get_json()['statut'] == 'traitee'
 
 
+def test_le_directeur_cree_toutes_les_classes_et_matieres_de_son_etablissement(client, app):
+    """Flux nominal : après création de son établissement, le directeur crée
+    TOUTES les classes (6eme, 5eme...) et leurs matières avec coefficients."""
+    entetes_admin, id_etab = creer_admin_et_etablissement(client, app)
+    creer_directeur(client, entetes_admin, id_etab)
+    entetes_dir = jetons_directeur(client)
+
+    # Il crée plusieurs classes dans son établissement
+    ids_classes = []
+    for nom, niveau in [('6eme A', '6eme'), ('6eme B', '6eme'), ('5eme A', '5eme')]:
+        r = client.post('/classes/', json={'nom_classe': nom, 'niveau': niveau,
+                                           'id_etablissement': id_etab},
+                        headers=entetes_dir)
+        assert r.status_code == 201, r.get_json()
+        ids_classes.append(r.get_json()['id_classe'])
+
+    # Doublon refusé
+    r = client.post('/classes/', json={'nom_classe': '6eme A', 'id_etablissement': id_etab},
+                    headers=entetes_dir)
+    assert r.status_code == 409
+
+    # Matières par classe, coefficients différents selon la classe
+    for id_classe in ids_classes:
+        for nom, coef in [('Maths', 4), ('Français', 3), ('Anglais', 2)]:
+            r = client.post('/matieres/', json={'nom_matiere': nom, 'coefficient': coef,
+                                                'id_classe': id_classe},
+                            headers=entetes_dir)
+            assert r.status_code == 201
+
+    # Il modifie une classe de son établissement
+    r = client.put(f"/classes/{ids_classes[0]}", json={'nom_classe': '6eme A+', 'niveau': '6eme'},
+                   headers=entetes_dir)
+    assert r.status_code == 200, r.get_json()
+    assert r.get_json()['nom_classe'] == '6eme A+'
+
+    # Il modifie/supprime une matière de son établissement
+    id_mat = client.get(f'/matieres/?id_classe={ids_classes[0]}').get_json()[0]['id_matiere']
+    r = client.put(f'/matieres/{id_mat}', json={'coefficient': 5}, headers=entetes_dir)
+    assert r.status_code == 200
+    assert r.get_json()['coefficient'] == 5
+    r = client.delete(f'/matieres/{id_mat}', headers=entetes_dir)
+    assert r.status_code == 200
+
+    # Il supprime une de ses classes
+    r = client.delete(f'/classes/{ids_classes[2]}', headers=entetes_dir)
+    assert r.status_code == 200
+
+    # Sa liste de classes ne contient que celles de SON établissement
+    r = client.get('/classes/', headers=entetes_dir)
+    assert r.status_code == 200
+    noms = {c['nom_classe'] for c in r.get_json()}
+    assert noms == {'6eme A+', '6eme B'}
+
+
+def test_directeur_ne_peut_pas_modifier_une_classe_hors_de_son_etablissement(client, app):
+    entetes_admin, id_etab_a = creer_admin_et_etablissement(client, app)
+    creer_directeur(client, entetes_admin, id_etab_a)
+    entetes_dir = jetons_directeur(client)
+
+    r = client.post('/etablissements/', json={'nom': 'Lycée C'}, headers=entetes_admin)
+    id_etab_b = r.get_json()['id_etablissement']
+    id_classe_b = client.post('/classes/', json={'nom_classe': '1ere',
+                                                 'id_etablissement': id_etab_b},
+                              headers=entetes_admin).get_json()['id_classe']
+
+    r = client.put(f'/classes/{id_classe_b}', json={'nom_classe': 'Pirate'},
+                   headers=entetes_dir)
+    assert r.status_code == 403
+    r = client.delete(f'/classes/{id_classe_b}', headers=entetes_dir)
+    assert r.status_code == 403
+    r = client.post('/matieres/', json={'nom_matiere': 'Philo', 'coefficient': 2,
+                                        'id_classe': id_classe_b},
+                    headers=entetes_dir)
+    assert r.status_code == 403
+
+
 def test_le_super_admin_ne_cree_pas_de_classe_a_la_place_du_directeur(client, app):
     """Le super admin garde techniquement le droit (rôle souverain) mais le
     flux nominal est : le directeur crée les classes de son établissement."""

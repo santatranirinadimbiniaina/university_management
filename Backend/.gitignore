@@ -2,4 +2,5 @@
 
 /_pycache_
 /app/_pycache_
+*.pytest_cache
 

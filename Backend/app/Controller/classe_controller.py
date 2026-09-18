@@ -31,10 +31,19 @@ Classe_model = Classe_ns.model('Classe', {
 class ClasseList(Resource):
     @Classe_ns.marshal_list_with(Classe_model)
     def get(self):
+        """Liste des classes. Un directeur ne voit que celles de son
+        établissement ; super admin voit tout."""
+        from .auth_helpers import role_courant
         id_etab = request.args.get('id_etablissement', type=int)
         requete = Classe.query
         if id_etab:
             requete = requete.filter_by(id_etablissement=id_etab)
+        try:
+            role, compte = role_courant()
+        except Exception:
+            role, compte = None, None
+        if role == 'directeur' and compte:
+            requete = requete.filter_by(id_etablissement=compte.id_etablissement)
         return requete.all()
 
     @jwt_required()
@@ -73,7 +82,15 @@ class ClasseResource(Resource):
     @Classe_ns.marshal_with(Classe_model)
     def put(self, id):
         classe = db.session.get(Classe, id) or Classe_ns.abort(404, 'Classe non trouvée')
+        if not _etablissement_autorise(classe.id_etablissement):
+            Classe_ns.abort(403, 'Vous ne gérez pas cet établissement')
         data = request.get_json() or {}
+        if data.get('nom_classe') and data.get('nom_classe') != classe.nom_classe:
+            doublon = Classe.query.filter_by(
+                nom_classe=data.get('nom_classe'),
+                id_etablissement=classe.id_etablissement).first()
+            if doublon:
+                Classe_ns.abort(409, 'Cette classe existe déjà dans cet établissement')
         classe.update(nom_classe=data.get('nom_classe'), niveau=data.get('niveau'))
         return classe
 

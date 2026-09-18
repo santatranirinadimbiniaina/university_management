@@ -25,6 +25,8 @@ interface EntityFormModalProps {
   initial?: Record<string, unknown>;
   onSubmit: (values: Record<string, string | number>) => Promise<void>;
   submitLabel?: string;
+  /** Appelé à chaque modification de champ (ex. pour filtrer des options). */
+  onFieldChange?: (name: string, value: string) => void;
 }
 
 export function EntityFormModal({
@@ -37,6 +39,7 @@ export function EntityFormModal({
   initial,
   onSubmit,
   submitLabel,
+  onFieldChange,
 }: EntityFormModalProps) {
   const [values, setValues] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -97,7 +100,10 @@ export function EntityFormModal({
                   label={field.label}
                   value={values[field.name] ?? ""}
                   error={errors[field.name]}
-                  onChange={(e) => setValues((v) => ({ ...v, [field.name]: e.target.value }))}
+                  onChange={(e) => {
+                    setValues((v) => ({ ...v, [field.name]: e.target.value }));
+                    onFieldChange?.(field.name, e.target.value);
+                  }}
                 >
                   <option value="">— Choisir —</option>
                   {field.options.map((o) => (

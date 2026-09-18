@@ -7,10 +7,11 @@ from .professeur_controller import Professeur_ns
 from .affectation_controller import Affectation_ns
 from .etudiant_controller import Etudiant_ns
 from .note_controller import Note_ns
+from .reclamation_controller import Reclamation_ns
 from .demande_releve_controller import DemandeReleve_ns
 
 __all__ = [
     'Etablissement_ns', 'Directeur_ns', 'Classe_ns', 'Matiere_ns',
-    'Professeur_ns', 'Affectation_ns', 'Etudiant_ns', 'Note_ns',
+    'Professeur_ns', 'Affectation_ns',    'Etudiant_ns', 'Note_ns', 'Reclamation_ns',
     'DemandeReleve_ns',
 ]

@@ -18,6 +18,7 @@ class Note(db.Model):
     id_matiere = db.Column(db.Integer, db.ForeignKey('matiere.id_matiere'), nullable=False)
     id_professeur = db.Column(db.Integer, db.ForeignKey('professeur.id_professeur'),
                               nullable=False)
+    remarque = db.Column(db.String(255))
 
     __table_args__ = (
         db.CheckConstraint('note >= 0 AND note <= 20', name='ck_note_0_20'),
@@ -36,6 +37,7 @@ class Note(db.Model):
             'id_etudiant': self.id_etudiant,
             'id_matiere': self.id_matiere,
             'id_professeur': self.id_professeur,
+            'remarque': self.remarque,
         }
 
     def save(self):
@@ -46,11 +48,13 @@ class Note(db.Model):
         db.session.delete(self)
         db.session.commit()
 
-    def update(self, note=None, type_evaluation=None, semestre=None):
+    def update(self, note=None, type_evaluation=None, semestre=None, remarque=None):
         if note is not None:
             self.note = Decimal(str(note))
         if type_evaluation:
             self.type_evaluation = type_evaluation
         if semestre:
             self.semestre = semestre
+        if remarque is not None:
+            self.remarque = remarque
         db.session.commit()

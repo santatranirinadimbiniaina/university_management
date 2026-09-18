@@ -14,7 +14,7 @@ from . import registre_model
 from app.Controller.admin_controller import SuperAdmin_ns
 from app.Controller.scolaire import (
     Etablissement_ns, Directeur_ns, Classe_ns, Matiere_ns, Professeur_ns,
-    Affectation_ns, Etudiant_ns, Note_ns, DemandeReleve_ns,
+    Affectation_ns, Etudiant_ns, Note_ns, Reclamation_ns, DemandeReleve_ns,
 )
 
 def output_json(data, code, headers=None):
@@ -83,6 +83,7 @@ def create_app():
     api.add_namespace(Affectation_ns)
     api.add_namespace(Etudiant_ns)
     api.add_namespace(Note_ns)
+    api.add_namespace(Reclamation_ns)
     api.add_namespace(DemandeReleve_ns)
 
     @app.route("/health")

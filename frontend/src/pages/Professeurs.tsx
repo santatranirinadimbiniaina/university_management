@@ -24,6 +24,7 @@ export default function Professeurs() {
   const toast = useToast();
 
   const [affOpen, setAffOpen] = useState(false);
+  const [classeChoisie, setClasseChoisie] = useState<string>("");
   const [deletingAff, setDeletingAff] = useState<Affectation | null>(null);
 
   const classeById = useMemo(() => new Map(classes.map((c) => [c.id_classe, c])), [classes]);
@@ -53,11 +54,22 @@ export default function Professeurs() {
       : f,
   );
 
+  /** Ouvre la modale d'assignation. */
+  const ouvrirAssignation = (_prof?: Professeur) => {
+    setClasseChoisie("");
+    setAffOpen(true);
+  };
+
+  /** Matières disponibles pour la classe choisie. */
+  const matieresDeClasseChoisie = matieres.filter(
+    (m) => String(m.id_classe) === classeChoisie,
+  );
+
   return (
     <div className="space-y-8">
       <ResourceManager<Professeur>
         title="Professeurs"
-        description="Chaque professeur dispose d'un identifiant et d'un mot de passe, et peut être affecté à une ou plusieurs classes sur une matière précise."
+        description="Chaque professeur dispose d'un identifiant et d'un mot de passe, et peut être assigné à une ou plusieurs classes sur une matière précise."
         entityLabel="Professeur"
         rows={professeurs}
         loading={loading}
@@ -97,27 +109,36 @@ export default function Professeurs() {
               return <Badge variant="brand">{n} cours</Badge>;
             },
           },
+          {
+            header: "",
+            render: (p) => (
+              <Button
+                size="sm"
+                variant="secondary"
+                icon={<UserPlus className="h-4 w-4" />}
+                onClick={() => ouvrirAssignation(p)}
+              >
+                Assigner une classe
+              </Button>
+            ),
+          },
         ]}
       />
 
-      {/* Affectations */}
+      {/* Affectations existantes */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="font-display text-xl font-bold tracking-tight text-ink-900">
               Affectations aux classes
             </h2>
             <p className="mt-1 text-sm text-ink-400">
-              Attribuez à chaque professeur ses classes et ses matières — c'est ce qui détermine
-              où il peut saisir des notes.
+              Le professeur ne peut saisir de notes que dans les classes et matières assignées
+              ci-dessous.
             </p>
           </div>
-          <Button
-            size="sm"
-            icon={<UserPlus className="h-4 w-4" />}
-            onClick={() => setAffOpen(true)}
-          >
-            Affecter
+          <Button size="sm" icon={<UserPlus className="h-4 w-4" />} onClick={() => ouvrirAssignation()}>
+            Assigner un professeur
           </Button>
         </div>
 
@@ -128,10 +149,10 @@ export default function Professeurs() {
             <EmptyState
               icon={<GraduationCap />}
               title="Aucune affectation"
-              description="Affectez un professeur à une classe pour qu'il puisse y saisir des notes."
+              description="Assignez un professeur à une classe pour qu'il puisse y saisir des notes."
               action={
-                <Button size="sm" icon={<UserPlus className="h-4 w-4" />} onClick={() => setAffOpen(true)}>
-                  Affecter un professeur
+                <Button size="sm" icon={<UserPlus className="h-4 w-4" />} onClick={() => ouvrirAssignation()}>
+                  Assigner un professeur
                 </Button>
               }
             />
@@ -144,8 +165,8 @@ export default function Professeurs() {
                 const classe = classeById.get(a.id_classe);
                 const matiere = matiereById.get(a.id_matiere);
                 return (
-                  <div key={a.id_affectation} className="flex items-center gap-4 px-5 py-3.5">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-50 text-brand-600 ring-1 ring-brand-100">
+                  <div key={a.id_affectation} className="flex flex-wrap items-center gap-3 px-4 py-3.5 sm:flex-nowrap sm:gap-4 sm:px-5">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600 ring-1 ring-brand-100">
                       <GraduationCap className="h-4 w-4" />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -172,12 +193,18 @@ export default function Professeurs() {
         )}
       </div>
 
-      {/* Formulaire d'affectation */}
+      {/* Formulaire d'assignation : classe puis matière */}
       <EntityFormModal
         open={affOpen}
-        onClose={() => setAffOpen(false)}
-        title="Affecter un professeur"
-        subtitle="Choisissez la classe et la matière que le professeur occupera."
+        onClose={() => {
+          setAffOpen(false);
+          setClasseChoisie("");
+        }}
+        title="Assigner une classe et une matière"
+        subtitle="Choisissez d'abord la classe, puis la matière que le professeur y occupera."
+        onFieldChange={(name, value) => {
+          if (name === "id_classe") setClasseChoisie(value);
+        }}
         fields={[
           {
             name: "id_professeur",
@@ -196,11 +223,11 @@ export default function Professeurs() {
           },
           {
             name: "id_matiere",
-            label: "Matière",
+            label: "Matière (de la classe choisie)",
             required: true,
-            options: matieres.map((m) => ({
+            options: matieresDeClasseChoisie.map((m) => ({
               value: String(m.id_matiere),
-              label: `${m.nom_matiere} (coef ${m.coefficient}) — ${classeById.get(m.id_classe)?.nom_classe ?? ""}`,
+              label: `${m.nom_matiere} (coef ${m.coefficient})`,
             })),
           },
         ]}
@@ -210,7 +237,10 @@ export default function Professeurs() {
             id_classe: Number(v.id_classe),
             id_matiere: Number(v.id_matiere),
           });
-          toast.success("Affectation créée", "Le professeur peut désormais saisir des notes dans cette classe.");
+          toast.success(
+            "Affectation créée",
+            "Le professeur peut désormais saisir des notes dans cette classe.",
+          );
         }}
       />
 

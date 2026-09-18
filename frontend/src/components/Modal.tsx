@@ -48,7 +48,7 @@ export function Modal({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.97 }}
             transition={{ type: "spring", stiffness: 380, damping: 34 }}
-            className={`relative z-10 flex max-h-[92vh] w-full ${maxWidth} flex-col overflow-hidden rounded-t-3xl bg-white shadow-lift sm:rounded-3xl`}
+            className={`relative z-10 flex max-h-[92vh] w-full ${maxWidth} max-w-full flex-col overflow-hidden rounded-t-3xl bg-white shadow-lift sm:rounded-3xl`}
             role="dialog"
             aria-modal="true"
           >
@@ -76,7 +76,7 @@ export function Modal({
                 </button>
               </div>
             )}
-            <div className="overflow-y-auto px-6 py-5">{children}</div>
+            <div className="overflow-y-auto overscroll-contain px-4 py-5 sm:px-6">{children}</div>
           </motion.div>
         </div>
       )}

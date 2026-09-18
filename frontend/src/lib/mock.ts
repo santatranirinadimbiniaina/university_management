@@ -8,6 +8,7 @@ import type {
   Matiere,
   Note,
   Professeur,
+  Reclamation,
 } from "./types";
 
 const daysAgo = (n: number) => {
@@ -62,4 +63,8 @@ export const mockNotes: Note[] = [
 
 export const mockDemandes: DemandeReleve[] = [
   { id_demande: 1, motif: "Dossier de bourse", statut: "en_attente", date_demande: daysAgo(2), id_etudiant: 1 },
+];
+
+export const mockReclamations: Reclamation[] = [
+  { id_reclamation: 1, motif: "Erreur possible de saisie, j'avais réussi cet exercice", statut: "en_attente", date_reclamation: daysAgo(1), id_etudiant: 2, id_note: 3 },
 ];

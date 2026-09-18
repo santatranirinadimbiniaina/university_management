@@ -61,6 +61,31 @@ body {
   font-feature-settings: "cv02", "cv03", "cv04", "ss01";
 }
 
+/* ---------- Anti-débordement mobile ---------- */
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Les longues chaînes (emails, matricules) ne débordent plus des cartes */
+body {
+  overflow-wrap: break-word;
+}
+
+/* Tables et grilles qui dépassent : défilement interne au lieu de casser la page */
+table {
+  display: block;
+  overflow-x: auto;
+}
+
+img,
+svg,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
 ::selection {
   background: var(--color-brand-500);
   color: #fff;

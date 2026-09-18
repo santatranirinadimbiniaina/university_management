@@ -7,6 +7,9 @@ import type {
   Classe,
   ClassePayload,
   DemandeReleve,
+  Reclamation,
+  ReclamationPayload,
+  ResultatsClasse,
   Etablissement,
   EtablissementPayload,
   Etudiant,
@@ -216,6 +219,28 @@ export const api = {
       `/notes/bulletin/${idEtudiant}${semestre ? `?semestre=${semestre}` : ""}`,
       { token },
     ),
+
+  resultatsClasse: (idClasse: number, semestre?: string, token?: string) =>
+    request<ResultatsClasse>(
+      `/notes/resultats/${idClasse}${semestre ? `?semestre=${semestre}` : ""}`,
+      { token },
+    ),
+
+  /* ------------------------------- Réclamations -------------------------------- */
+  listReclamations: (token: string) =>
+    request<Reclamation[]>("/reclamations/", { token }),
+  createReclamation: (token: string, payload: ReclamationPayload) =>
+    request<Reclamation>("/reclamations/", { method: "POST", body: payload, token }),
+  traiterReclamation: (
+    token: string,
+    id: number,
+    payload: { statut: string; nouvelle_note?: number; remarque?: string },
+  ) =>
+    request<Reclamation>(`/reclamations/${id}/traiter`, {
+      method: "PUT",
+      body: payload,
+      token,
+    }),
 
   /* ------------------------ Demandes de relevé de notes ------------------------ */
   listDemandesReleve: (token: string) =>

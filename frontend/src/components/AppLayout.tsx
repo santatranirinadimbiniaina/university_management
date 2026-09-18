@@ -76,7 +76,7 @@ function Shell() {
           </div>
         </header>
 
-        <main className="relative mx-auto w-full max-w-[1240px] px-4 pb-16 pt-8 sm:px-8 lg:px-12 lg:pt-10">
+        <main className="relative mx-auto w-full max-w-[1240px] overflow-x-hidden px-3 pb-16 pt-6 sm:px-6 lg:px-12 lg:pt-10">
           {/* halo décoratif */}
           <div className="pointer-events-none absolute -top-24 right-0 -z-0 h-64 w-64 rounded-full bg-brand-200/40 blur-3xl" />
           <Outlet />

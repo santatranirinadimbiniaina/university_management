@@ -76,7 +76,18 @@ export interface Note {
   id_etudiant: number;
   id_matiere: number;
   id_professeur: number;
+  remarque?: string | null;
   date_saisie?: string;
+}
+
+export interface Reclamation {
+  id_reclamation: number;
+  motif: string;
+  statut: "en_attente" | "acceptee" | "refusee";
+  date_reclamation?: string;
+  date_traitement?: string | null;
+  id_etudiant: number;
+  id_note: number;
 }
 
 export interface DemandeReleve {
@@ -159,12 +170,47 @@ export interface EtudiantPayload {
   mot_de_passe?: string;
 }
 
+export interface ReclamationPayload {
+  id_note: number;
+  motif: string;
+}
+
 export interface NotePayload {
   note: number;
   type_evaluation?: string;
   semestre?: string;
+  remarque?: string;
   id_etudiant: number;
   id_matiere: number;
+}
+
+export interface EntreeClassement {
+  id_etudiant: number;
+  etudiant: string;
+  moyenne: number;
+  rang: number;
+}
+
+export interface LigneResultat {
+  id_matiere: number;
+  matiere: string;
+  coefficient: number;
+  classement: EntreeClassement[];
+}
+
+export interface EntreeClassementGeneral {
+  id_etudiant: number;
+  etudiant: string;
+  moyenne_generale: number | null;
+  rang: number;
+}
+
+export interface ResultatsClasse {
+  classe: Classe;
+  etablissement: Etablissement | null;
+  semestre?: string | null;
+  matieres: LigneResultat[];
+  classement_general: EntreeClassementGeneral[];
 }
 
 /* --------------------------------- Session --------------------------------- */

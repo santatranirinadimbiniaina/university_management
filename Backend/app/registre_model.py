@@ -7,4 +7,5 @@ from app.Model.professeur_model import Professeur
 from app.Model.affectation_model import Affectation
 from app.Model.etudiant_model import Etudiant
 from app.Model.note_model import Note
+from app.Model.reclamation_model import Reclamation
 from app.Model.demande_releve_model import DemandeReleve

@@ -18,6 +18,7 @@ import {
   mockMatieres,
   mockNotes,
   mockProfesseurs,
+  mockReclamations,
 } from "@/lib/mock";
 import type {
   Affectation,
@@ -37,6 +38,9 @@ import type {
   NotePayload,
   Professeur,
   ProfesseurPayload,
+  Reclamation,
+  ReclamationPayload,
+  ResultatsClasse,
 } from "@/lib/types";
 import { useAuth } from "./AuthContext";
 
@@ -52,6 +56,7 @@ interface DataContextValue {
   etudiants: Etudiant[];
   notes: Note[];
   demandesReleve: DemandeReleve[];
+  reclamations: Reclamation[];
   loading: boolean;
   error: string | null;
   apiStatus: ApiStatus;
@@ -77,9 +82,16 @@ interface DataContextValue {
   updateEtudiant: (id: number, payload: Partial<EtudiantPayload>) => Promise<void>;
   deleteEtudiant: (id: number) => Promise<void>;
   createNote: (payload: NotePayload) => Promise<void>;
+  updateNote: (id: number, payload: Partial<NotePayload>) => Promise<void>;
   deleteNote: (id: number) => Promise<void>;
   createDemandeReleve: (motif: string) => Promise<void>;
   traiterDemandeReleve: (id: number, statut: string) => Promise<void>;
+  createReclamation: (payload: ReclamationPayload) => Promise<void>;
+  traiterReclamation: (
+    id: number,
+    payload: { statut: string; nouvelle_note?: number; remarque?: string },
+  ) => Promise<void>;
+  fetchResultatsClasse: (idClasse: number, semestre?: string) => Promise<ResultatsClasse>;
 }
 
 const DataContext = createContext<DataContextValue | null>(null);
@@ -97,6 +109,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [etudiants, setEtudiants] = useState<Etudiant[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
   const [demandesReleve, setDemandesReleve] = useState<DemandeReleve[]>([]);
+  const [reclamations, setReclamations] = useState<Reclamation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [apiStatus, setApiStatus] = useState<ApiStatus>("inconnu");
@@ -136,6 +149,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setEtudiants(mockEtudiants);
         setNotes(mockNotes);
         setDemandesReleve(mockDemandes);
+        setReclamations(mockReclamations);
         setApiStatus("demo");
         setLoading(false);
         return;
@@ -143,17 +157,25 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
       try {
         const isAdmin = session.type === "super_admin";
-        const [ets, dirs, cls, mats, profs, affs, etus, notesData, demandes] = await Promise.all([
-          api.listEtablissements(),
-          api.listDirecteurs(),
-          api.listClasses(),
-          api.listMatieres(),
-          api.listProfesseurs(),
-          api.listAffectations(),
-          api.listEtudiants(),
-          api.listNotes({}),
-          isAdmin ? withAuth((t) => api.listDemandesReleve(t)) : Promise.resolve([] as DemandeReleve[]),
-        ]);
+        const isEtudiant = session.type === "etudiant";
+        const peutVoirDemandes = isAdmin || isEtudiant || session.type === "directeur";
+        const [ets, dirs, cls, mats, profs, affs, etus, notesData, demandes, recs] =
+          await Promise.all([
+            api.listEtablissements(),
+            api.listDirecteurs(),
+            api.listClasses(session.accessToken),
+            api.listMatieres(session.accessToken),
+            api.listProfesseurs(),
+            api.listAffectations(),
+            api.listEtudiants(),
+            api.listNotes({}),
+            peutVoirDemandes
+              ? withAuth((t) => api.listDemandesReleve(t))
+              : Promise.resolve([] as DemandeReleve[]),
+            isEtudiant || session.type === "professeur"
+              ? withAuth((t) => api.listReclamations(t))
+              : Promise.resolve([] as Reclamation[]),
+          ]);
         setEtablissements(ets);
         setDirecteurs(dirs);
         setClasses(cls);
@@ -163,6 +185,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setEtudiants(etus);
         setNotes(notesData);
         setDemandesReleve(demandes);
+        setReclamations(recs);
         setApiStatus("connecte");
       } catch (err) {
         setApiStatus("hors-ligne");
@@ -294,9 +317,33 @@ export function DataProvider({ children }: { children: ReactNode }) {
     (payload: NotePayload) => mutate((t) => api.createNote(t, payload)),
     [mutate],
   );
+  const updateNote = useCallback(
+    (id: number, payload: Partial<NotePayload>) =>
+      mutate((t) => api.updateNote(t, id, payload)),
+    [mutate],
+  );
   const deleteNote = useCallback(
     (id: number) => mutate((t) => api.deleteNote(t, id)),
     [mutate],
+  );
+
+  /* ------------------------------ Réclamations -------------------------------- */
+
+  const createReclamation = useCallback(
+    (payload: ReclamationPayload) => mutate((t) => api.createReclamation(t, payload)),
+    [mutate],
+  );
+  const traiterReclamation = useCallback(
+    (id: number, payload: { statut: string; nouvelle_note?: number; remarque?: string }) =>
+      mutate((t) => api.traiterReclamation(t, id, payload)),
+    [mutate],
+  );
+
+  /** Appel direct (sans rafraîchissement du store) pour l'export PDF du directeur. */
+  const fetchResultatsClasse = useCallback(
+    (idClasse: number, semestre?: string) =>
+      withAuth((t) => api.resultatsClasse(idClasse, semestre, t)),
+    [withAuth],
   );
 
   /* --------------------------- Demandes de relevé ------------------------------ */
@@ -321,6 +368,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       etudiants,
       notes,
       demandesReleve,
+      reclamations,
       loading,
       error,
       apiStatus,
@@ -346,13 +394,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
       updateEtudiant,
       deleteEtudiant,
       createNote,
+      updateNote,
       deleteNote,
       createDemandeReleve,
       traiterDemandeReleve,
+      createReclamation,
+      traiterReclamation,
+      fetchResultatsClasse,
     }),
     [
       etablissements, directeurs, classes, matieres, professeurs, affectations, etudiants,
-      notes, demandesReleve, loading, error, apiStatus, reload,
+      notes, demandesReleve, reclamations, loading, error, apiStatus, reload,
       createEtablissement, updateEtablissement, deleteEtablissement,
       createDirecteur, updateDirecteur, deleteDirecteur,
       createClasse, updateClasse, deleteClasse,
@@ -360,8 +412,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
       createProfesseur, updateProfesseur, deleteProfesseur,
       createAffectation, deleteAffectation,
       createEtudiant, updateEtudiant, deleteEtudiant,
-      createNote, deleteNote,
+      createNote, updateNote, deleteNote,
       createDemandeReleve, traiterDemandeReleve,
+      createReclamation, traiterReclamation, fetchResultatsClasse,
     ],
   );
 

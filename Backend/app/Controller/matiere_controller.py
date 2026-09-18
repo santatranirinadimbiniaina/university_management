@@ -32,10 +32,21 @@ Matiere_model = Matiere_ns.model('Matiere', {
 class MatiereList(Resource):
     @Matiere_ns.marshal_list_with(Matiere_model)
     def get(self):
+        """Liste des matières. Un directeur ne voit que celles des classes
+        de son établissement ; super admin voit tout."""
+        from .auth_helpers import role_courant
         id_classe = request.args.get('id_classe', type=int)
         requete = Matiere.query
         if id_classe:
             requete = requete.filter_by(id_classe=id_classe)
+        try:
+            role, compte = role_courant()
+        except Exception:
+            role, compte = None, None
+        if role == 'directeur' and compte:
+            ids_classes = [c.id_classe for c in Classe.query.filter_by(
+                id_etablissement=compte.id_etablissement).all()]
+            requete = requete.filter(Matiere.id_classe.in_(ids_classes))
         return requete.all()
 
     @jwt_required()
@@ -81,6 +92,8 @@ class MatiereResource(Resource):
     @Matiere_ns.marshal_with(Matiere_model)
     def put(self, id):
         matiere = db.session.get(Matiere, id) or Matiere_ns.abort(404, 'Matière non trouvée')
+        if not _classe_autorisee(matiere.classe):
+            Matiere_ns.abort(403, 'Vous ne gérez pas cet établissement')
         data = request.get_json() or {}
         matiere.update(nom_matiere=data.get('nom_matiere'),
                        coefficient=data.get('coefficient'))
